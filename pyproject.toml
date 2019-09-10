@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "philiprehberger-http-retry"
-version = "0.1.0"
+version = "0.1.1"
 description = "Resilient HTTP client with automatic retries and backoff."
 readme = "README.md"
 license = "MIT"
@@ -24,9 +24,16 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/philiprehberger/py-http-retry"
+Homepage = "https://github.com/philiprehberger/py-http-retry#readme"
 Repository = "https://github.com/philiprehberger/py-http-retry"
 Issues = "https://github.com/philiprehberger/py-http-retry/issues"
+Changelog = "https://github.com/philiprehberger/py-http-retry/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/philiprehberger_http_retry"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+strict = true
