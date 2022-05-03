@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.0 (2026-03-27)
+
+- Add configurable backoff strategies: `"exponential"`, `"linear"`, `"constant"`, or custom callable
+- Add `on_retry` callback parameter for logging and observability
+- Session class now accepts `backoff` strategy and `on_retry` hook
+- Add issue templates, PR template, and Dependabot config
+- Update README with full badge set and Support section
+
 ## 0.1.1 (2026-03-22)
 
 - Add badges to README
