@@ -2,12 +2,7 @@
 
 [![Tests](https://github.com/philiprehberger/py-http-retry/actions/workflows/publish.yml/badge.svg)](https://github.com/philiprehberger/py-http-retry/actions/workflows/publish.yml)
 [![PyPI version](https://img.shields.io/pypi/v/philiprehberger-http-retry.svg)](https://pypi.org/project/philiprehberger-http-retry/)
-[![GitHub release](https://img.shields.io/github/v/release/philiprehberger/py-http-retry)](https://github.com/philiprehberger/py-http-retry/releases)
 [![Last updated](https://img.shields.io/github/last-commit/philiprehberger/py-http-retry)](https://github.com/philiprehberger/py-http-retry/commits/main)
-[![License](https://img.shields.io/github/license/philiprehberger/py-http-retry)](LICENSE)
-[![Bug Reports](https://img.shields.io/github/issues/philiprehberger/py-http-retry/bug)](https://github.com/philiprehberger/py-http-retry/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
-[![Feature Requests](https://img.shields.io/github/issues/philiprehberger/py-http-retry/enhancement)](https://github.com/philiprehberger/py-http-retry/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
-[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
 Resilient HTTP client with automatic retries and configurable backoff.
 
@@ -115,10 +110,21 @@ python -m pytest tests/ -v
 
 ## Support
 
-If you find this package useful, consider starring the repository.
+If you find this project useful:
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Philip%20Rehberger-blue?logo=linkedin)](https://www.linkedin.com/in/philiprehberger)
-[![More packages](https://img.shields.io/badge/More%20packages-philiprehberger-orange)](https://github.com/philiprehberger/packages)
+⭐ [Star the repo](https://github.com/philiprehberger/py-http-retry)
+
+🐛 [Report issues](https://github.com/philiprehberger/py-http-retry/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+
+💡 [Suggest features](https://github.com/philiprehberger/py-http-retry/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
+
+❤️ [Sponsor development](https://github.com/sponsors/philiprehberger)
+
+🌐 [All Open Source Projects](https://philiprehberger.com/open-source-packages)
+
+💻 [GitHub Profile](https://github.com/philiprehberger)
+
+🔗 [LinkedIn Profile](https://www.linkedin.com/in/philiprehberger)
 
 ## License
 
