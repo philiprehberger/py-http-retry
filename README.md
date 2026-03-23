@@ -1,8 +1,12 @@
 # philiprehberger-http-retry
 
+[![Tests](https://github.com/philiprehberger/py-http-retry/actions/workflows/publish.yml/badge.svg)](https://github.com/philiprehberger/py-http-retry/actions/workflows/publish.yml)
+[![PyPI version](https://img.shields.io/pypi/v/philiprehberger-http-retry.svg)](https://pypi.org/project/philiprehberger-http-retry/)
+[![License](https://img.shields.io/github/license/philiprehberger/py-http-retry)](LICENSE)
+
 Resilient HTTP client with automatic retries and backoff.
 
-## Install
+## Installation
 
 ```bash
 pip install philiprehberger-http-retry
@@ -79,6 +83,13 @@ except RetryExhaustedError as err:
 | `resilient_post(url, data=None, json_data=None, **kwargs)` | POST wrapper. Auto-serializes `json_data` and sets Content-Type. |
 | `Session(base_url, default_headers, retries, backoff, timeout, retry_on)` | Stores defaults. Methods: `get(path)`, `post(path)`. |
 | `RetryExhaustedError` | Raised after all retries fail. Attributes: `.attempts`, `.last_error`. |
+
+## Development
+
+```bash
+pip install -e .
+python -m pytest tests/ -v
+```
 
 ## License
 
