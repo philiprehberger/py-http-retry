@@ -39,14 +39,14 @@ class TestSession:
             base_url="https://api.example.com",
             default_headers={"Authorization": "Bearer tok"},
             retries=5,
-            backoff=False,
+            backoff="constant",
             timeout=10,
             retry_on=(500, 502),
         )
         assert session.base_url == "https://api.example.com"
         assert session.default_headers == {"Authorization": "Bearer tok"}
         assert session.retries == 5
-        assert session.backoff is False
+        assert session.backoff == "constant"
         assert session.timeout == 10
         assert session.retry_on == (500, 502)
 
@@ -55,7 +55,7 @@ class TestSession:
         assert session.base_url == ""
         assert session.default_headers == {}
         assert session.retries == 3
-        assert session.backoff is True
+        assert session.backoff == "exponential"
         assert session.timeout == 30
 
     def test_strips_trailing_slash_from_base_url(self) -> None:
@@ -69,7 +69,7 @@ class TestResilientRequest:
         mock_urlopen.side_effect = urllib.error.URLError("connection refused")  # type: ignore[attr-defined]
 
         with pytest.raises(RetryExhaustedError) as exc_info:
-            resilient_request("GET", "http://example.com", retries=3, backoff=False)
+            resilient_request("GET", "http://example.com", retries=3, backoff=lambda _: 0)
 
         assert exc_info.value.attempts == 3
         assert isinstance(exc_info.value.last_error, urllib.error.URLError)
@@ -78,7 +78,7 @@ class TestResilientRequest:
     def test_returns_response_on_success(self, mock_urlopen: object) -> None:
         mock_urlopen.return_value = "fake_response"  # type: ignore[attr-defined]
 
-        result = resilient_request("GET", "http://example.com", retries=3, backoff=False)
+        result = resilient_request("GET", "http://example.com", retries=3, backoff=lambda _: 0)
         assert result == "fake_response"
 
     @patch("philiprehberger_http_retry.urllib.request.urlopen")
@@ -88,7 +88,7 @@ class TestResilientRequest:
         )
         mock_urlopen.side_effect = [error_500, error_500, "success"]  # type: ignore[attr-defined]
 
-        result = resilient_request("GET", "http://example.com", retries=3, backoff=False)
+        result = resilient_request("GET", "http://example.com", retries=3, backoff=lambda _: 0)
         assert result == "success"
         assert mock_urlopen.call_count == 3  # type: ignore[attr-defined]
 
@@ -100,4 +100,4 @@ class TestResilientRequest:
         mock_urlopen.side_effect = error_404  # type: ignore[attr-defined]
 
         with pytest.raises(urllib.error.HTTPError):
-            resilient_request("GET", "http://example.com", retries=3, backoff=False)
+            resilient_request("GET", "http://example.com", retries=3, backoff=lambda _: 0)
