@@ -64,6 +64,31 @@ response = resilient_get(
 )
 ```
 
+### Circuit breaker
+
+```python
+from philiprehberger_http_retry import (
+    CircuitBreaker,
+    CircuitBreakerOpen,
+    resilient_get,
+)
+
+breaker = CircuitBreaker(failure_threshold=5, reset_timeout=30.0)
+
+try:
+    response = resilient_get(
+        "https://flaky-api.example.com/data",
+        circuit_breaker=breaker,
+    )
+except CircuitBreakerOpen as err:
+    print(f"Breaker tripped, retry after unix time {err.next_retry_at:.0f}")
+```
+
+The breaker counts request outcomes (not retry attempts). After
+`failure_threshold` consecutive failures it trips to `open` and rejects
+calls until `reset_timeout` elapses, then probes one request in
+`half_open` before returning to `closed`.
+
 ### Session with Defaults
 
 ```python
@@ -98,7 +123,9 @@ except RetryExhaustedError as err:
 | `resilient_request(method, url, **kwargs)` | Core retry function. Supports `data`, `headers`, `retries`, `backoff`, `timeout`, `retry_on`, `on_retry`. |
 | `resilient_get(url, **kwargs)` | GET convenience wrapper around `resilient_request`. |
 | `resilient_post(url, data=None, json_data=None, **kwargs)` | POST wrapper. Auto-serializes `json_data` and sets Content-Type. |
-| `Session(base_url, default_headers, retries, backoff, timeout, retry_on, on_retry)` | Stores defaults. Methods: `get(path)`, `post(path)`. |
+| `Session(base_url, default_headers, retries, backoff, timeout, retry_on, on_retry, circuit_breaker)` | Stores defaults. Methods: `get(path)`, `post(path)`. |
+| `CircuitBreaker(failure_threshold, reset_timeout, half_open_max_calls)` | Trips to `open` after consecutive failures, probes via `half_open`. Methods: `allow_request()`, `record_success()`, `record_failure()`. |
+| `CircuitBreakerOpen` | Raised when the breaker rejects a request. Attribute: `.next_retry_at` (unix timestamp). |
 | `RetryExhaustedError` | Raised after all retries fail. Attributes: `.attempts`, `.last_error`. |
 
 ## Development

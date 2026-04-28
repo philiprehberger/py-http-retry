@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 (2026-04-27)
+
+- Add `CircuitBreaker` class with `closed`/`open`/`half_open` states for failure threshold detection
+- Accept `circuit_breaker` keyword on `resilient_request`, `resilient_get`, `resilient_post`, and `Session`
+- Raise `CircuitBreakerOpen` instead of attempting a request when the breaker is tripped
+
 ## 0.2.1 (2026-03-31)
 
 - Standardize README to 3-badge format with emoji Support section
