@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.0 (2026-05-30)
+
+- Add `resilient_put()` and `resilient_delete()` convenience functions matching the existing get/post API
+
 ## 0.3.0 (2026-04-27)
 
 - Add `CircuitBreaker` class with `closed`/`open`/`half_open` states for failure threshold detection

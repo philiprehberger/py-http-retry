@@ -13,6 +13,8 @@ from philiprehberger_http_retry import (
     CircuitBreakerOpen,
     RetryExhaustedError,
     Session,
+    resilient_delete,
+    resilient_put,
     resilient_request,
 )
 
@@ -228,3 +230,141 @@ class TestCircuitBreaker:
         assert cb.state == "open"
         with pytest.raises(CircuitBreakerOpen):
             session.get("/path", backoff=lambda _: 0)
+
+
+class TestResilientPut:
+    @patch("philiprehberger_http_retry.urllib.request.urlopen")
+    def test_sends_put_method(self, mock_urlopen: object) -> None:
+        mock_urlopen.return_value = "ok"  # type: ignore[attr-defined]
+
+        result = resilient_put(
+            "http://example.com", data=b"payload", backoff=lambda _: 0
+        )
+        assert result == "ok"
+        req = mock_urlopen.call_args[0][0]  # type: ignore[attr-defined]
+        assert req.get_method() == "PUT"
+        assert req.data == b"payload"
+
+    @patch("philiprehberger_http_retry.urllib.request.urlopen")
+    def test_serializes_json_data(self, mock_urlopen: object) -> None:
+        mock_urlopen.return_value = "ok"  # type: ignore[attr-defined]
+
+        resilient_put(
+            "http://example.com",
+            json_data={"name": "widget"},
+            backoff=lambda _: 0,
+        )
+        req = mock_urlopen.call_args[0][0]  # type: ignore[attr-defined]
+        assert req.get_method() == "PUT"
+        assert req.data == b'{"name": "widget"}'
+        assert req.headers.get("Content-type") == "application/json"
+
+    @patch("philiprehberger_http_retry.urllib.request.urlopen")
+    def test_retries_on_retryable_status(self, mock_urlopen: object) -> None:
+        error_503 = urllib.error.HTTPError(
+            "http://example.com", 503, "Service Unavailable", {}, None  # type: ignore[arg-type]
+        )
+        mock_urlopen.side_effect = [error_503, error_503, "success"]  # type: ignore[attr-defined]
+
+        result = resilient_put(
+            "http://example.com",
+            data=b"x",
+            retries=3,
+            backoff=lambda _: 0,
+        )
+        assert result == "success"
+        assert mock_urlopen.call_count == 3  # type: ignore[attr-defined]
+
+    @patch("philiprehberger_http_retry.urllib.request.urlopen")
+    def test_raises_after_retries_exhausted(self, mock_urlopen: object) -> None:
+        mock_urlopen.side_effect = urllib.error.URLError("boom")  # type: ignore[attr-defined]
+
+        with pytest.raises(RetryExhaustedError) as exc_info:
+            resilient_put(
+                "http://example.com",
+                data=b"x",
+                retries=2,
+                backoff=lambda _: 0,
+            )
+        assert exc_info.value.attempts == 2
+
+    @patch("philiprehberger_http_retry.urllib.request.urlopen")
+    def test_forwards_on_retry_kwarg(self, mock_urlopen: object) -> None:
+        mock_urlopen.side_effect = [
+            urllib.error.URLError("boom"),
+            "ok",
+        ]  # type: ignore[attr-defined]
+        retries_seen: list[int] = []
+
+        def hook(attempt: int, error: Exception) -> None:
+            retries_seen.append(attempt)
+
+        result = resilient_put(
+            "http://example.com",
+            data=b"x",
+            retries=3,
+            backoff=lambda _: 0,
+            on_retry=hook,
+        )
+        assert result == "ok"
+        assert retries_seen == [1]
+
+
+class TestResilientDelete:
+    @patch("philiprehberger_http_retry.urllib.request.urlopen")
+    def test_sends_delete_method(self, mock_urlopen: object) -> None:
+        mock_urlopen.return_value = "ok"  # type: ignore[attr-defined]
+
+        result = resilient_delete("http://example.com", backoff=lambda _: 0)
+        assert result == "ok"
+        req = mock_urlopen.call_args[0][0]  # type: ignore[attr-defined]
+        assert req.get_method() == "DELETE"
+        assert req.data is None
+
+    @patch("philiprehberger_http_retry.urllib.request.urlopen")
+    def test_retries_on_retryable_status(self, mock_urlopen: object) -> None:
+        error_502 = urllib.error.HTTPError(
+            "http://example.com", 502, "Bad Gateway", {}, None  # type: ignore[arg-type]
+        )
+        mock_urlopen.side_effect = [error_502, "success"]  # type: ignore[attr-defined]
+
+        result = resilient_delete(
+            "http://example.com",
+            retries=3,
+            backoff=lambda _: 0,
+        )
+        assert result == "success"
+        assert mock_urlopen.call_count == 2  # type: ignore[attr-defined]
+
+    @patch("philiprehberger_http_retry.urllib.request.urlopen")
+    def test_raises_after_retries_exhausted(self, mock_urlopen: object) -> None:
+        mock_urlopen.side_effect = urllib.error.URLError("boom")  # type: ignore[attr-defined]
+
+        with pytest.raises(RetryExhaustedError) as exc_info:
+            resilient_delete(
+                "http://example.com",
+                retries=2,
+                backoff=lambda _: 0,
+            )
+        assert exc_info.value.attempts == 2
+
+    @patch("philiprehberger_http_retry.urllib.request.urlopen")
+    def test_forwards_retry_kwargs(self, mock_urlopen: object) -> None:
+        mock_urlopen.side_effect = [
+            urllib.error.URLError("boom"),
+            urllib.error.URLError("boom"),
+            "ok",
+        ]  # type: ignore[attr-defined]
+        retries_seen: list[int] = []
+
+        def hook(attempt: int, error: Exception) -> None:
+            retries_seen.append(attempt)
+
+        result = resilient_delete(
+            "http://example.com",
+            retries=5,
+            backoff=lambda _: 0,
+            on_retry=hook,
+        )
+        assert result == "ok"
+        assert retries_seen == [1, 2]

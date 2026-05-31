@@ -15,7 +15,13 @@ pip install philiprehberger-http-retry
 ## Usage
 
 ```python
-from philiprehberger_http_retry import resilient_get, resilient_post, Session
+from philiprehberger_http_retry import (
+    resilient_get,
+    resilient_post,
+    resilient_put,
+    resilient_delete,
+    Session,
+)
 ```
 
 ### Simple Requests
@@ -30,6 +36,15 @@ response = resilient_post(
     "https://api.example.com/items",
     json_data={"name": "widget", "count": 5},
 )
+
+# PUT with JSON body
+response = resilient_put(
+    "https://api.example.com/items/42",
+    json_data={"name": "widget", "count": 7},
+)
+
+# DELETE request
+response = resilient_delete("https://api.example.com/items/42")
 ```
 
 ### Backoff Strategies
@@ -123,6 +138,8 @@ except RetryExhaustedError as err:
 | `resilient_request(method, url, **kwargs)` | Core retry function. Supports `data`, `headers`, `retries`, `backoff`, `timeout`, `retry_on`, `on_retry`. |
 | `resilient_get(url, **kwargs)` | GET convenience wrapper around `resilient_request`. |
 | `resilient_post(url, data=None, json_data=None, **kwargs)` | POST wrapper. Auto-serializes `json_data` and sets Content-Type. |
+| `resilient_put(url, data=None, json_data=None, **kwargs)` | PUT wrapper. Auto-serializes `json_data` and sets Content-Type. |
+| `resilient_delete(url, **kwargs)` | DELETE convenience wrapper around `resilient_request`. |
 | `Session(base_url, default_headers, retries, backoff, timeout, retry_on, on_retry, circuit_breaker)` | Stores defaults. Methods: `get(path)`, `post(path)`. |
 | `CircuitBreaker(failure_threshold, reset_timeout, half_open_max_calls)` | Trips to `open` after consecutive failures, probes via `half_open`. Methods: `allow_request()`, `record_success()`, `record_failure()`. |
 | `CircuitBreakerOpen` | Raised when the breaker rejects a request. Attribute: `.next_retry_at` (unix timestamp). |
