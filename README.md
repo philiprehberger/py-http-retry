@@ -4,6 +4,8 @@
 [![PyPI version](https://img.shields.io/pypi/v/philiprehberger-http-retry.svg)](https://pypi.org/project/philiprehberger-http-retry/)
 [![Last updated](https://img.shields.io/github/last-commit/philiprehberger/py-http-retry)](https://github.com/philiprehberger/py-http-retry/commits/main)
 
+![philiprehberger-http-retry](https://raw.githubusercontent.com/philiprehberger/py-http-retry/main/package-card.webp)
+
 Resilient HTTP client with automatic retries and configurable backoff.
 
 ## Installation
@@ -19,7 +21,9 @@ from philiprehberger_http_retry import (
     resilient_get,
     resilient_post,
     resilient_put,
+    resilient_patch,
     resilient_delete,
+    resilient_head,
     Session,
 )
 ```
@@ -43,8 +47,17 @@ response = resilient_put(
     json_data={"name": "widget", "count": 7},
 )
 
+# PATCH with JSON body
+response = resilient_patch(
+    "https://api.example.com/items/42",
+    json_data={"status": "active"},
+)
+
 # DELETE request
 response = resilient_delete("https://api.example.com/items/42")
+
+# HEAD request (e.g. existence/size check)
+response = resilient_head("https://api.example.com/items/42")
 ```
 
 ### Backoff Strategies
@@ -139,7 +152,9 @@ except RetryExhaustedError as err:
 | `resilient_get(url, **kwargs)` | GET convenience wrapper around `resilient_request`. |
 | `resilient_post(url, data=None, json_data=None, **kwargs)` | POST wrapper. Auto-serializes `json_data` and sets Content-Type. |
 | `resilient_put(url, data=None, json_data=None, **kwargs)` | PUT wrapper. Auto-serializes `json_data` and sets Content-Type. |
+| `resilient_patch(url, data=None, json_data=None, **kwargs)` | PATCH wrapper. Auto-serializes `json_data` and sets Content-Type. |
 | `resilient_delete(url, **kwargs)` | DELETE convenience wrapper around `resilient_request`. |
+| `resilient_head(url, **kwargs)` | HEAD convenience wrapper around `resilient_request`. |
 | `Session(base_url, default_headers, retries, backoff, timeout, retry_on, on_retry, circuit_breaker)` | Stores defaults. Methods: `get(path)`, `post(path)`. |
 | `CircuitBreaker(failure_threshold, reset_timeout, half_open_max_calls)` | Trips to `open` after consecutive failures, probes via `half_open`. Methods: `allow_request()`, `record_success()`, `record_failure()`. |
 | `CircuitBreakerOpen` | Raised when the breaker rejects a request. Attribute: `.next_retry_at` (unix timestamp). |

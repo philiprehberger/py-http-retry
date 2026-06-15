@@ -18,6 +18,8 @@ __all__ = [
     "Session",
     "resilient_delete",
     "resilient_get",
+    "resilient_head",
+    "resilient_patch",
     "resilient_post",
     "resilient_put",
     "resilient_request",
@@ -327,6 +329,49 @@ def resilient_delete(url: str, **kwargs: Any) -> HTTPResponse:
         HTTPResponse on success.
     """
     return resilient_request("DELETE", url, **kwargs)
+
+
+def resilient_patch(
+    url: str,
+    data: bytes | None = None,
+    json_data: Any = None,
+    **kwargs: Any,
+) -> HTTPResponse:
+    """Send a PATCH request with automatic retries.
+
+    If json_data is provided, it is serialized to JSON and the Content-Type
+    header is set to application/json.
+
+    Args:
+        url: The URL to request.
+        data: Raw request body as bytes.
+        json_data: Data to serialize as JSON for the request body.
+        **kwargs: Additional arguments passed to resilient_request,
+            including the optional ``circuit_breaker``.
+
+    Returns:
+        HTTPResponse on success.
+    """
+    if json_data is not None:
+        data = json.dumps(json_data).encode("utf-8")
+        headers = kwargs.pop("headers", None) or {}
+        headers.setdefault("Content-Type", "application/json")
+        kwargs["headers"] = headers
+    return resilient_request("PATCH", url, data=data, **kwargs)
+
+
+def resilient_head(url: str, **kwargs: Any) -> HTTPResponse:
+    """Send a HEAD request with automatic retries.
+
+    Args:
+        url: The URL to request.
+        **kwargs: Additional arguments passed to resilient_request,
+            including the optional ``circuit_breaker``.
+
+    Returns:
+        HTTPResponse on success.
+    """
+    return resilient_request("HEAD", url, **kwargs)
 
 
 class Session:

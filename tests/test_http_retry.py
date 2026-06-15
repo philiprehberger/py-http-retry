@@ -14,6 +14,8 @@ from philiprehberger_http_retry import (
     RetryExhaustedError,
     Session,
     resilient_delete,
+    resilient_head,
+    resilient_patch,
     resilient_put,
     resilient_request,
 )
@@ -368,3 +370,43 @@ class TestResilientDelete:
         )
         assert result == "ok"
         assert retries_seen == [1, 2]
+
+
+class TestResilientPatch:
+    @patch("philiprehberger_http_retry.urllib.request.urlopen")
+    def test_sends_patch_method(self, mock_urlopen: object) -> None:
+        mock_urlopen.return_value = "ok"  # type: ignore[attr-defined]
+
+        result = resilient_patch(
+            "http://example.com", data=b"payload", backoff=lambda _: 0
+        )
+        assert result == "ok"
+        req = mock_urlopen.call_args[0][0]  # type: ignore[attr-defined]
+        assert req.get_method() == "PATCH"
+        assert req.data == b"payload"
+
+    @patch("philiprehberger_http_retry.urllib.request.urlopen")
+    def test_serializes_json_data(self, mock_urlopen: object) -> None:
+        mock_urlopen.return_value = "ok"  # type: ignore[attr-defined]
+
+        resilient_patch(
+            "http://example.com",
+            json_data={"status": "active"},
+            backoff=lambda _: 0,
+        )
+        req = mock_urlopen.call_args[0][0]  # type: ignore[attr-defined]
+        assert req.get_method() == "PATCH"
+        assert req.data == b'{"status": "active"}'
+        assert req.headers.get("Content-type") == "application/json"
+
+
+class TestResilientHead:
+    @patch("philiprehberger_http_retry.urllib.request.urlopen")
+    def test_sends_head_method(self, mock_urlopen: object) -> None:
+        mock_urlopen.return_value = "ok"  # type: ignore[attr-defined]
+
+        result = resilient_head("http://example.com", backoff=lambda _: 0)
+        assert result == "ok"
+        req = mock_urlopen.call_args[0][0]  # type: ignore[attr-defined]
+        assert req.get_method() == "HEAD"
+        assert req.data is None

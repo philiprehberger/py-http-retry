@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.0 (2026-06-15)
+
+- Add `resilient_patch()` and `resilient_head()` convenience functions for full HTTP method parity
+- Sync `pyproject.toml` description to match the README one-liner (“configurable backoff”)
+- Add package-card image to README
+
 ## 0.4.0 (2026-05-30)
 
 - Add `resilient_put()` and `resilient_delete()` convenience functions matching the existing get/post API
